@@ -4,11 +4,12 @@
 Two deterministic outputs, no randomness, no external inputs:
 
 - assets/org-logo.png          1024x1024 organization avatar
-- assets/org-social-card.png     1200x630 social preview for this repo
+- assets/org-social-card.png   1200x630 social preview for this repository
 
-The mark: three ascending compute lanes (teal -> blue, the family accent
-range) under a rising trend line — everything inside the circle-mask safe
-area. assets/org-logo.svg is the hand-maintained vector twin of the logo
+The mark: a pointy-top hexagon ring with a horizontal teal -> blue gradient
+(a chip/lattice outline) around a bold H. Everything sits inside the
+circle-mask safe area and stays legible down to ~40px avatars.
+assets/org-logo.svg is the hand-maintained vector twin of the same
 geometry; keep the three artifacts in sync.
 
     python3 scripts/generate_org_logo.py --check   # verify committed files
@@ -16,6 +17,7 @@ geometry; keep the three artifacts in sync.
 """
 
 import argparse
+import math
 import sys
 from pathlib import Path
 
@@ -23,7 +25,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 BG = (13, 17, 23)          # deep charcoal, matches the family cards
 TEAL = (63, 185, 170)
-MID = (80, 172, 212)
 BLUE = (98, 160, 255)
 FG = (240, 246, 252)       # near-white
 DIM = (139, 148, 158)      # muted grey
@@ -34,6 +35,11 @@ FONT_PATHS = [
     "/System/Library/Fonts/SUPPLEMENTARY/Arial Bold.ttf",
 ]
 
+HEX_R = 370        # hexagon circumradius (logo coordinates, 1024x1024)
+RING_W = 72        # hexagon ring stroke width
+H_SIZE = 500       # H glyph size
+H_Y_OFFSET = 12    # optical centering
+
 
 def font(size: int) -> ImageFont.FreeTypeFont:
     for p in FONT_PATHS:
@@ -42,50 +48,52 @@ def font(size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.load_default()
 
 
-BARS = [  # staircase bars, logo coordinates (1024x1024)
-    (182, 700, 260, 150, TEAL),
-    (382, 480, 260, 150, MID),
-    (582, 260, 260, 150, BLUE),
-]
-TREND = [(192, 672), (392, 452), (592, 232), (796, 148)]
-LINE_W = 40
+def lerp(a, b, t):
+    return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
 
-def draw_mark(d: ImageDraw.ImageDraw, scale: float = 1.0, dx: int = 0, dy: int = 0) -> None:
-    lw = max(4, round(LINE_W * scale))
-    for x, y, w, h, color in BARS:
-        x0, y0 = round(x * scale) + dx, round(y * scale) + dy
-        d.rounded_rectangle([x0, y0, x0 + round(w * scale), y0 + round(h * scale)],
-                            radius=round(44 * scale), fill=color)
-    pts = [(round(x * scale) + dx, round(y * scale) + dy) for x, y in TREND]
-    for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
-        d.line([x1, y1, x2, y2], fill=FG, width=lw)
-    for x, y in pts:
-        r = lw // 2
-        d.ellipse([x - r, y - r, x + r, y + r], fill=FG)
-    (hx, hy), (px_, py_) = pts[-1], pts[-2]
-    ddx, ddy = hx - px_, hy - py_
-    ln = (ddx * ddx + ddy * ddy) ** 0.5
-    ux, uy = ddx / ln, ddy / ln
-    qx, qy = -uy, ux
-    wing = round(96 * scale)
-    for side in (1, -1):
-        d.line([hx, hy,
-                round(hx + wing * (-ux + side * qx * 0.72)),
-                round(hy + wing * (-uy + side * qy * 0.72))], fill=FG, width=lw)
+def gradient_rgb(c1=TEAL, c2=BLUE, size: int = 1024) -> Image.Image:
+    img = Image.new("RGB", (size, size))
+    d = ImageDraw.Draw(img)
+    for i in range(size):
+        d.line([(i, 0), (i, size)], fill=lerp(c1, c2, i / (size - 1)))
+    return img
+
+
+def hex_points(cx: float, cy: float, r: float) -> list[tuple[float, float]]:
+    # pointy-top: one vertex straight up
+    return [(cx + r * math.cos(math.radians(60 * i - 90)),
+             cy + r * math.sin(math.radians(60 * i - 90))) for i in range(6)]
+
+
+def draw_mark(img: Image.Image, scale: float = 1.0) -> Image.Image:
+    """Hex ring + H, drawn centered onto `img` (RGBA compositing for the gradient)."""
+    size = img.size[0]
+    grad = gradient_rgb(size=size)
+    r, w = HEX_R * scale, RING_W * scale
+    cx = cy = size / 2
+    ring = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(ring).polygon(hex_points(cx, cy, r), outline=255, width=round(w))
+    layer = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    layer.paste(grad, (0, 0), ring)
+    img = Image.alpha_composite(img.convert("RGBA"), layer)
+    d = ImageDraw.Draw(img)
+    d.text((cx, cy + H_Y_OFFSET * scale), "H",
+           font=font(max(8, round(H_SIZE * scale))), fill=FG + (255,), anchor="mm")
+    return img
 
 
 def render_logo() -> Image.Image:
     img = Image.new("RGB", (1024, 1024), BG)
-    draw_mark(ImageDraw.Draw(img))
-    return img
+    return draw_mark(img).convert("RGB")
 
 
 def render_card() -> Image.Image:
     img = Image.new("RGB", (1200, 630), BG)
+    mark = draw_mark(Image.new("RGB", (1024, 1024), BG), scale=0.62)
+    mark = mark.resize((635, 635), Image.LANCZOS)
+    img.paste(mark, (-60, 0))
     d = ImageDraw.Draw(img)
-    # mark at ~0.62 scale, vertically centered on the left
-    draw_mark(d, scale=0.62, dx=-40, dy=110)
     x = 610
     d.text((x, 190), "High-Performance", font=font(78), fill=FG)
     d.text((x, 280), "AI Lab", font=font(78), fill=FG)

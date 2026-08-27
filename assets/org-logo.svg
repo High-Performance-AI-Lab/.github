@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <!-- High-Performance-AI-Lab organization logo — vector twin of
        assets/org-logo.png (see scripts/generate_org_logo.py). Keep in sync. -->
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1024" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3fb9aa"/>
+      <stop offset="1" stop-color="#62a0ff"/>
+    </linearGradient>
+  </defs>
   <rect width="1024" height="1024" fill="#0d1117"/>
-  <rect x="182" y="700" width="260" height="150" rx="44" fill="#3fb9aa"/>
-  <rect x="382" y="480" width="260" height="150" rx="44" fill="#50acd4"/>
-  <rect x="582" y="260" width="260" height="150" rx="44" fill="#62a0ff"/>
-  <polyline points="192,672 392,452 592,232 796,148"
-            fill="none" stroke="#f0f6fc" stroke-width="40"
-            stroke-linecap="round" stroke-linejoin="round"/>
-  <polyline points="796,148 724,158 768,222" fill="none" stroke="#f0f6fc"
-            stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="512,142 832.2,326.9 832.2,717.1 512,902 191.8,717.1 191.8,326.9"
+           fill="none" stroke="url(#ring)" stroke-width="72"
+           stroke-linejoin="round"/>
+  <text x="512" y="512" fill="#f0f6fc"
+        font-family="SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="500" font-weight="700" text-anchor="middle" dominant-baseline="central">H</text>
 </svg>
