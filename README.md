@@ -3,7 +3,9 @@
 This repository holds the organization-level assets for
 [High-Performance-AI-Lab](https://github.com/High-Performance-AI-Lab): the
 organization avatar/logo, the org-homepage profile README, the social
-preview for this repository itself, and the organization website.
+preview for this repository itself. The organization website lives in its
+own org-domain repository,
+[high-performance-ai-lab.github.io](https://github.com/High-Performance-AI-Lab/high-performance-ai-lab.github.io).
 
 ## What is in here
 
@@ -13,7 +15,6 @@ preview for this repository itself, and the organization website.
 | `assets/org-logo.svg` | Hand-maintained vector twin of the logo geometry. |
 | `assets/org-social-card.png` | This repo's 1200×630 social preview. |
 | `profile/README.md` | The README GitHub renders on the organization homepage. |
-| `website/` | The organization website (Astro, static output). Built and deployed to GitHub Pages by `.github/workflows/deploy-website.yml`, which auto-detects the Pages base path — the same site moved to an `OWNER.github.io` repo would serve from the domain root with no changes. |
 | `scripts/generate_org_logo.py` | Deterministic generator for the raster assets — no randomness, no external inputs. |
 
 ## Regenerating the assets
@@ -21,15 +22,6 @@ preview for this repository itself, and the organization website.
 ```sh
 python3 scripts/generate_org_logo.py           # regenerate logo + card
 python3 scripts/generate_org_logo.py --check   # verify committed copies
-```
-
-## Working on the website
-
-```sh
-cd website
-npm install
-npm run dev        # live preview at localhost
-npm run build      # astro check + static build to website/dist
 ```
 
 `assets/org-logo.svg` is maintained by hand; keep it in sync with the

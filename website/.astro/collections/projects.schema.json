@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "tagline": {
+      "type": "string"
+    },
+    "eyebrow": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "systems",
+        "tools",
+        "education",
+        "proofs"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "order": {
+      "type": "number"
+    },
+    "stackOrder": {
+      "type": "number"
+    },
+    "stackAction": {
+      "type": "string"
+    },
+    "stackRole": {
+      "type": "string"
+    },
+    "accent": {
+      "type": "string",
+      "enum": [
+        "oxide",
+        "cobalt",
+        "citron",
+        "violet",
+        "moss",
+        "amber",
+        "teal",
+        "cyan",
+        "rose"
+      ]
+    },
+    "icon": {
+      "type": "string",
+      "enum": [
+        "lattice",
+        "checkpoint",
+        "proof",
+        "curriculum",
+        "neural-die",
+        "trace"
+      ]
+    },
+    "status": {
+      "type": "string"
+    },
+    "metric": {
+      "type": "string"
+    },
+    "metricLabel": {
+      "type": "string"
+    },
+    "command": {
+      "type": "string"
+    },
+    "featured": {
+      "default": false,
+      "type": "boolean"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "tagline",
+    "eyebrow",
+    "description",
+    "category",
+    "tags",
+    "order",
+    "stackOrder",
+    "stackAction",
+    "stackRole",
+    "accent",
+    "icon",
+    "status"
+  ]
+}
