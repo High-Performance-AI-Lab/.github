@@ -6,18 +6,26 @@ Two deterministic outputs, no randomness, no external inputs:
 - assets/org-logo.png          1024x1024 organization avatar
 - assets/org-social-card.png   1200x630 social preview for this repository
 
-The mark: a pointy-top hexagon ring with a horizontal teal -> blue gradient
-(a chip/lattice outline) around a bold H. Everything sits inside the
-circle-mask safe area and stays legible down to ~40px avatars.
-assets/org-logo.svg is the hand-maintained vector twin of the same
-geometry; keep the three artifacts in sync.
+The mark: a 4x4 grid of rounded memory pages; the lit pages climb as a
+measured series (1, 3, 2, 4 — a real benchmark trace, dip included) in
+flat teal -> blue steps along the diagonal, the oxide page at the top
+right is the decode head writing the next token (the hot page), and the
+unlit pages stay dim. Everything sits inside the circle-mask safe area
+and stays legible down to ~32px avatars. assets/org-logo.svg is the
+hand-maintained vector twin of the same geometry; keep the three
+artifacts in sync.
+
+Color system: the ramp colors are the on-dark lifts of the website's
+palette (hpailab-site/src/styles/global.css) — teal #3fb9aa ~ site teal
+#0f766e, blue #62a0ff ~ site cobalt #2563eb — and the decode head is the
+site's primary accent oxide at its bright dark-surface value #ea580c.
+Neutrals are GitHub Primer dark, native to where these assets live.
 
     python3 scripts/generate_org_logo.py --check   # verify committed files
     python3 scripts/generate_org_logo.py           # regenerate
 """
 
 import argparse
-import math
 import sys
 from pathlib import Path
 
@@ -26,8 +34,10 @@ from PIL import Image, ImageDraw, ImageFont
 BG = (13, 17, 23)          # deep charcoal, matches the family cards
 TEAL = (63, 185, 170)
 BLUE = (98, 160, 255)
+OXIDE = (234, 88, 12)      # site primary accent, bright on-dark value
 FG = (240, 246, 252)       # near-white
-DIM = (139, 148, 158)      # muted grey
+DIM = (139, 148, 158)      # muted grey (card text)
+PAGE_DIM = (30, 38, 49)    # unlit memory page
 
 FONT_PATHS = [
     "/System/Library/Fonts/SFNS.ttf",
@@ -35,10 +45,11 @@ FONT_PATHS = [
     "/System/Library/Fonts/SUPPLEMENTARY/Arial Bold.ttf",
 ]
 
-HEX_R = 370        # hexagon circumradius (logo coordinates, 1024x1024)
-RING_W = 72        # hexagon ring stroke width
-H_SIZE = 500       # H glyph size
-H_Y_OFFSET = 12    # optical centering
+GRID_N = 4                 # pages per side
+CELL = 140                 # page size (logo coordinates, 1024x1024)
+GAP = 32                   # gap between pages
+RADIUS = 29                # page corner radius
+HEIGHTS = [1, 3, 2, 4]     # lit pages per column, left to right
 
 
 def font(size: int) -> ImageFont.FreeTypeFont:
@@ -52,53 +63,43 @@ def lerp(a, b, t):
     return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
 
-def gradient_rgb(c1=TEAL, c2=BLUE, size: int = 1024) -> Image.Image:
-    img = Image.new("RGB", (size, size))
-    d = ImageDraw.Draw(img)
-    for i in range(size):
-        d.line([(i, 0), (i, size)], fill=lerp(c1, c2, i / (size - 1)))
-    return img
-
-
-def hex_points(cx: float, cy: float, r: float) -> list[tuple[float, float]]:
-    # pointy-top: one vertex straight up
-    return [(cx + r * math.cos(math.radians(60 * i - 90)),
-             cy + r * math.sin(math.radians(60 * i - 90))) for i in range(6)]
-
-
 def draw_mark(img: Image.Image, scale: float = 1.0) -> Image.Image:
-    """Hex ring + H, drawn centered onto `img` (RGBA compositing for the gradient)."""
+    """Memory-page grid with the lit measured series, centered onto `img`."""
     size = img.size[0]
-    grad = gradient_rgb(size=size)
-    r, w = HEX_R * scale, RING_W * scale
-    cx = cy = size / 2
-    ring = Image.new("L", (size, size), 0)
-    ImageDraw.Draw(ring).polygon(hex_points(cx, cy, r), outline=255, width=round(w))
-    layer = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    layer.paste(grad, (0, 0), ring)
-    img = Image.alpha_composite(img.convert("RGBA"), layer)
     d = ImageDraw.Draw(img)
-    d.text((cx, cy + H_Y_OFFSET * scale), "H",
-           font=font(max(8, round(H_SIZE * scale))), fill=FG + (255,), anchor="mm")
+    cell, gap = CELL * scale, GAP * scale
+    total = GRID_N * cell + (GRID_N - 1) * gap
+    x0 = y0 = (size - total) / 2
+    for c in range(GRID_N):
+        for r in range(GRID_N):        # r = 0 is the bottom row
+            x = x0 + c * (cell + gap)
+            y = y0 + (GRID_N - 1 - r) * (cell + gap)
+            if r >= HEIGHTS[c]:
+                color = PAGE_DIM
+            elif c == GRID_N - 1 and r == HEIGHTS[c] - 1:
+                color = OXIDE          # the decode head, the hot page
+            else:
+                color = lerp(TEAL, BLUE, (c + r) / (2 * (GRID_N - 1)))
+            d.rounded_rectangle([x, y, x + cell, y + cell],
+                                radius=RADIUS * scale, fill=color)
     return img
 
 
 def render_logo() -> Image.Image:
-    img = Image.new("RGB", (1024, 1024), BG)
-    return draw_mark(img).convert("RGB")
+    return draw_mark(Image.new("RGB", (1024, 1024), BG))
 
 
 def render_card() -> Image.Image:
     img = Image.new("RGB", (1200, 630), BG)
-    mark = draw_mark(Image.new("RGB", (1024, 1024), BG), scale=0.62)
+    mark = draw_mark(Image.new("RGB", (1024, 1024), BG), scale=0.78)
     mark = mark.resize((635, 635), Image.LANCZOS)
     img.paste(mark, (-60, 0))
     d = ImageDraw.Draw(img)
-    x = 610
-    d.text((x, 190), "High-Performance", font=font(78), fill=FG)
+    x = 540
+    d.text((x, 190), "High Performance", font=font(78), fill=FG)
     d.text((x, 280), "AI Lab", font=font(78), fill=FG)
-    d.text((x, 420), "Memory-first LLM infrastructure,", font=font(40), fill=TEAL)
-    d.text((x, 472), "measured end to end.", font=font(40), fill=TEAL)
+    d.text((x, 420), "Open systems for local inference,", font=font(40), fill=TEAL)
+    d.text((x, 472), "proofs, and measured intelligence.", font=font(40), fill=TEAL)
     d.text((x, 552), "github.com/High-Performance-AI-Lab", font=font(28), fill=DIM)
     return img
 

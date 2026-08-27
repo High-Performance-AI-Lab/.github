@@ -11,7 +11,7 @@ own org-domain repository,
 
 | Path | What it is |
 |---|---|
-| `assets/org-logo.png` | The organization avatar (1024×1024). The mark — three ascending compute lanes under a rising trend line — sits entirely inside the circle-mask safe area. |
+| `assets/org-logo.png` | The organization avatar (1024×1024). The mark — a measured benchmark series lit across a 4×4 grid of memory pages, with the oxide decode head (the hot page) writing the next token top right — sits entirely inside the circle-mask safe area. |
 | `assets/org-logo.svg` | Hand-maintained vector twin of the logo geometry. |
 | `assets/org-social-card.png` | This repo's 1200×630 social preview. |
 | `profile/README.md` | The README GitHub renders on the organization homepage. |
@@ -36,9 +36,20 @@ generator's geometry when the mark changes.
 - **Org homepage README:** automatic once `profile/README.md` exists on the
   default branch and the repository is public.
 
-The color range (teal `#3fb9aa` through blue `#62a0ff` on charcoal
-`#0d1117`) is the family accent range shared by the social cards of the
-muser, kvpack, muser-console, and muser-book repositories.
+## Color system
+
+These assets live on GitHub's dark UI, so they use dark-surface values of
+the website palette (`hpailab-site/src/styles/global.css`):
+
+| Here (on charcoal `#0d1117`) | Website (on paper `#faf9f7`) | Role |
+|---|---|---|
+| teal `#3fb9aa` | `--teal` / `--accent-2` `#0f766e` | ramp start (same hue, lifted for dark) |
+| blue `#62a0ff` | `--cobalt` `#2563eb` | ramp end (same hue, lifted for dark) |
+| oxide `#ea580c` | `--accent` `#c2410c` / `--accent-bright` `#ea580c` | the decode head — the site's primary accent |
+| `#f0f6fc` / `#8b949e` | `--ink` / `--muted` | text neutrals (GitHub Primer dark) |
+
+The teal→blue range is also the accent range shared by the social cards
+of the muser, kvpack, muser-console, and muser-book repositories.
 
 ## License
 

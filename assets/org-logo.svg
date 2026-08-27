@@ -1,17 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <!-- High-Performance-AI-Lab organization logo — vector twin of
-       assets/org-logo.png (see scripts/generate_org_logo.py). Keep in sync. -->
-  <defs>
-    <linearGradient id="ring" x1="0" y1="0" x2="1024" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3fb9aa"/>
-      <stop offset="1" stop-color="#62a0ff"/>
-    </linearGradient>
-  </defs>
+       assets/org-logo.png (see scripts/generate_org_logo.py). Keep in sync.
+       A 4x4 grid of memory pages: the lit pages climb as a measured series
+       (1, 3, 2, 4) in flat teal->blue steps along the diagonal; the oxide
+       page top right is the decode head (the hot page); the rest stay dim.
+       Ramp = on-dark lifts of the site teal/cobalt; head = site oxide.
+       Grid: 140px pages, 32px gaps, 184px margin, rx 29. -->
   <rect width="1024" height="1024" fill="#0d1117"/>
-  <polygon points="512,142 832.2,326.9 832.2,717.1 512,902 191.8,717.1 191.8,326.9"
-           fill="none" stroke="url(#ring)" stroke-width="72"
-           stroke-linejoin="round"/>
-  <text x="512" y="512" fill="#f0f6fc"
-        font-family="SF Pro Display, Helvetica Neue, Helvetica, Arial, sans-serif"
-        font-size="500" font-weight="700" text-anchor="middle" dominant-baseline="central">H</text>
+  <!-- unlit pages -->
+  <g fill="#1e2631">
+    <rect x="184" y="184" width="140" height="140" rx="29"/>
+    <rect x="184" y="356" width="140" height="140" rx="29"/>
+    <rect x="184" y="528" width="140" height="140" rx="29"/>
+    <rect x="356" y="184" width="140" height="140" rx="29"/>
+    <rect x="528" y="184" width="140" height="140" rx="29"/>
+    <rect x="528" y="356" width="140" height="140" rx="29"/>
+  </g>
+  <!-- lit pages: the measured series, teal->blue by (col+row)/6 -->
+  <rect x="184" y="700" width="140" height="140" rx="29" fill="#3fb9aa"/>
+  <rect x="356" y="700" width="140" height="140" rx="29" fill="#45b5b8"/>
+  <rect x="356" y="528" width="140" height="140" rx="29" fill="#4bb1c6"/>
+  <rect x="356" y="356" width="140" height="140" rx="29" fill="#50acd4"/>
+  <rect x="528" y="700" width="140" height="140" rx="29" fill="#4bb1c6"/>
+  <rect x="528" y="528" width="140" height="140" rx="29" fill="#50acd4"/>
+  <rect x="700" y="700" width="140" height="140" rx="29" fill="#50acd4"/>
+  <rect x="700" y="528" width="140" height="140" rx="29" fill="#56a8e3"/>
+  <rect x="700" y="356" width="140" height="140" rx="29" fill="#5ca4f1"/>
+  <!-- the decode head, the hot page -->
+  <rect x="700" y="184" width="140" height="140" rx="29" fill="#ea580c"/>
 </svg>
